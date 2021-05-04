@@ -5,7 +5,6 @@ var cookieParser = require('cookie-parser');
 var logger = require('morgan');
 var cors = require('cors');
 var mongoose = require('mongoose');
-var session = require('express-session')
 
 require('./models/User');
 
@@ -22,7 +21,6 @@ app.set('view engine', 'jade');
 
 
 app.use(cors());
-app.use(session());
 app.use(logger('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
