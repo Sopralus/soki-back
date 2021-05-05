@@ -1,21 +1,31 @@
 var express = require('express');
 var router = express.Router();
 var mongoose = require('mongoose');
+const middleware = require('../middleware.js');
 
-// router.post('/auth', (req, res, next) => {
-//   const { username, password } = req.body;
-//   const user = await mongoose.model('User').findOne({
-//     username,
-//     password
-//   })
 
-//   if(user) {
-//     res.json({ toker: user._id })
-//   } else {
-//     res.status(401)
-//     res.json({ message: "login failed" });
-//   }
-// })
+// POST check auth to login
+router.post('/auth', async(req, res, next) => {
+  const { username, password } = req.body;
+  const user = await mongoose.model('User').findOne({
+    username,
+    password
+  })
+
+  if (user) {
+    res.json({
+      success: true,
+      message: 'Authentication successful!',
+      // token: token,
+      toker: user._id
+    });
+  } else {
+    res.send(403).json({
+      success: false,
+      message: 'Login failed'
+    });
+  } 
+})
 
 /* GET users listing. */
 router.get('/', async(req, res, next) => {
