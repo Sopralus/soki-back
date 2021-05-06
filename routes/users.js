@@ -37,6 +37,12 @@ router.post('/', async(req, res, next) => {
   res.json(await mongoose.model('User').create(req.body));
 });
 
+// /* GET one user from streamkey. */
+// router.post('/:streamkey', async(req, res, next) => {
+//   res.json(await mongoose.model('User').findOne(req.params.streamkey));
+// });
+
+
 /* Update one user. */
 router.put('/:id', async(req, res, next) => {
   res.json(await mongoose.model('User').findByIdAndUpdate(req.params.id, req.body));

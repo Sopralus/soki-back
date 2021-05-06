@@ -5,7 +5,7 @@ var cookieParser = require('cookie-parser');
 var logger = require('morgan');
 var cors = require('cors');
 var mongoose = require('mongoose');
-const http = require('http');
+// const http = require('http');
 
 require('./models/User');
 
@@ -15,31 +15,6 @@ var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
 
 var app = express();
-const server = http.createServer(app);
-const io = require('socket.io')(server);
-server.listen(3030, () => {
-  console.log('listening on *:3000');
-});
-
-// var io = require('socket.io').listen(server);
-
-app.get('/', (req, res) => {
-  res.sendFile(path.join( __dirname, '../soki-front/rtmp/index.html'));
-});
-
-io.on('connection', (socket) => {
-  console.log('a user connected');
-  socket.on('disconnect', () => {
-    console.log('user disconnected');
-  });
-});
-
-io.on('connection', (socket) => {
-  socket.on('chat message', (msg) => {
-    io.emit('chat message', msg);
-  });
-});
-
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));

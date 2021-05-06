@@ -3,7 +3,8 @@ Schema = mongoose.Schema;
 
 var UserSchema = new Schema({
   username: { type: String, required: true, unique: true },
-  password: { type: String, required: true }
+  password: { type: String, required: true },
+  streamkey: { type: String, required:true, unique:true }
 });
 
 UserSchema.methods.comparePassword = function (enteredPassword, callback) {
