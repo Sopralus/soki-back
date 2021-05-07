@@ -3,6 +3,9 @@
 Dans le back nous gérons la BDD (mongoDB) et les 
 sockets.
 
+Un npm install est nécessaire à la racine pour que 
+le back fonctionne.
+
 Les fichiers suivants ne servent à rien car nous
 n'avons pas fini de mettre en place les JWT mais ils
 serviront quant ce sera fait :
