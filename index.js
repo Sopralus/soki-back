@@ -13,6 +13,7 @@
  var cors = require('cors');
  var mongoose = require('mongoose');
  
+ // connexion à la BDD
  require('./models/User');
  
  mongoose.connect('mongodb://localhost/soki');
@@ -139,6 +140,7 @@ var debug = require('debug')('soki-back:server');
    debug('Listening on ' + bind);
  }
 
+// Traitement des websockets
 const io = require("socket.io")(server, {
   cors: {
     origin: true,
@@ -146,8 +148,12 @@ const io = require("socket.io")(server, {
     credentials: true,
   },
 });
+
+// fonctions pour gérer les utilisateurs
 const formatMessage = require('./messages.js');
 const { userJoin, getCurrentUser, userLeave, getRoomUsers, getUsers } = require('./users.js');
+
+// les usernames
 const botname = "Soki Bot";
 var userName = "anonymous";
 
@@ -159,6 +165,7 @@ io.on('connection', (socket) => {
   let id = socket.id;
   socket.emit('id', id);
 
+  // lorsqu'un utilisateur rejoint une room
   socket.on('joinRoom', ({ username, room }) => {
     const user = userJoin(socket.id, userName, room);
 
@@ -168,16 +175,20 @@ io.on('connection', (socket) => {
       room: user.username
     });
 
+    // envoi d'un message dans un chat par le bot
     socket.emit("message", formatMessage(botname, user.username + " welcome to the chat !"));
     socket.broadcast
     .to(user.room)
     .emit("message", formatMessage(botname, user.username + " has joined the chat"));
 
+    // lorsqu'un utilisateur se déconnecte
+    // (nous n'avons pas réussi à gérer le disconnect)
     socket.on('userleave', () => {
       userLeave(socket.id);
     })
   });
 
+  // lorsqu'un utilisateur quitte une "room"
   socket.on('leaveRoom', ( room ) => {
     const user = userLeave(socket.id);
 
@@ -188,11 +199,13 @@ io.on('connection', (socket) => {
     socket.leave(room);
   });
 
+  // envoi d'un message dans le chat par les utilisateurs
   socket.on('chat message', (msg) => {
     const user = getCurrentUser(socket.id);
     io.to(user.room).emit('message', formatMessage(user.username, msg));
   });
 
+  // le disconnect qui ne fonctionne pas
   socket.on('disconnect', () => {
     const user = userLeave(socket.id);
 
@@ -208,8 +221,8 @@ io.on('connection', (socket) => {
     }
   })
 
+  // résupère le nom de l'utilisateur s'il change
   socket.on('username', (username) => {
     userName = username;
-    // io.emit('username', username);
   })
 });
