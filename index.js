@@ -139,27 +139,92 @@ var debug = require('debug')('soki-back:server');
    debug('Listening on ' + bind);
  }
 
-var io = require("socket.io")(server, {
+const io = require("socket.io")(server, {
   cors: {
     origin: true,
     methods: ["GET", "POST"],
     credentials: true,
   },
 });
+const formatMessage = require('./messages.js');
+const { userJoin, getCurrentUser, userLeave, getRoomUsers, getUsers } = require('./users.js');
+const botname = "Soki Bot";
+var userName = "anonymous";
 
 app.get('/', (req, res) => {
   res.sendFile('../soki-front/rtmp/index.html');
 });
 
 io.on('connection', (socket) => {
-  console.log('a user connected');
-  socket.on('disconnect', () => {
-    console.log('user disconnected');
-  });
-});
+  let id = socket.id;
+  socket.emit('id', id);
 
-io.on('connection', (socket) => {
-  socket.on('chat message', (msg) => {
-    io.emit('chat message', msg);
+  socket.on('joinRoom', ({ username, room }) => {
+    const user = userJoin(socket.id, userName, room);
+
+    socket.join(user.room);
+
+    socket.emit('roomUsers', {
+      room: user.username
+    });
+
+    io.emit('allUsers', {
+      room: user,
+      users: getUsers()
+    });
+
+    socket.emit("message", formatMessage(botname, user.username + " welcome to the chat !"));
+    socket.broadcast
+    .to(user.room)
+    .emit("message", formatMessage(botname, user.username + " has joined the chat"));
+
+    socket.on('userleave', () => {
+      userLeave(socket.id);
+    })
   });
+
+  socket.on('leaveRoom', ( room ) => {
+    const user = userLeave(socket.id);
+
+    if(user){
+      socket.broadcast.to(room).emit('message', formatMessage(botname, userName + ' has left the chat'));
+      
+      // io.emit('roomUsers', {
+      //   room: user.room,
+      //   users: getRoomUsers(user.room)
+      // });
+    }
+    socket.leave(room);
+  });
+
+  socket.on('chat message', (msg) => {
+    const user = getCurrentUser(socket.id);
+    io.to(user.room).emit('chat message', formatMessage(userName, msg));
+  });
+
+  socket.on('disconnect', () => {
+    const user = userLeave(socket.id);
+
+    if(user){
+      io.to(user.room).emit('message', formatMessage(botname, 'A user have left the chat'));
+      
+      io.emit('roomUsers', {
+        room: user.room,
+        users: getRoomUsers(user.room)
+      });
+      socket.leave(user.room);
+
+    }
+  })
+
+  
+
+  // socket.on('channel', (user) => {
+  //   io.emit('channel', user);
+  // });
+
+  socket.on('username', (username) => {
+    userName = username;
+    // io.emit('username', username);
+  })
 });
