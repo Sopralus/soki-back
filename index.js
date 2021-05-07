@@ -168,11 +168,6 @@ io.on('connection', (socket) => {
       room: user.username
     });
 
-    io.emit('allUsers', {
-      room: user,
-      users: getUsers()
-    });
-
     socket.emit("message", formatMessage(botname, user.username + " welcome to the chat !"));
     socket.broadcast
     .to(user.room)
@@ -189,17 +184,13 @@ io.on('connection', (socket) => {
     if(user){
       socket.broadcast.to(room).emit('message', formatMessage(botname, userName + ' has left the chat'));
       
-      // io.emit('roomUsers', {
-      //   room: user.room,
-      //   users: getRoomUsers(user.room)
-      // });
     }
     socket.leave(room);
   });
 
   socket.on('chat message', (msg) => {
     const user = getCurrentUser(socket.id);
-    io.to(user.room).emit('chat message', formatMessage(userName, msg));
+    io.to(user.room).emit('message', formatMessage(userName, msg));
   });
 
   socket.on('disconnect', () => {
@@ -216,12 +207,6 @@ io.on('connection', (socket) => {
 
     }
   })
-
-  
-
-  // socket.on('channel', (user) => {
-  //   io.emit('channel', user);
-  // });
 
   socket.on('username', (username) => {
     userName = username;
