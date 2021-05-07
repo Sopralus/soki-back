@@ -190,7 +190,7 @@ io.on('connection', (socket) => {
 
   socket.on('chat message', (msg) => {
     const user = getCurrentUser(socket.id);
-    io.to(user.room).emit('message', formatMessage(userName, msg));
+    io.to(user.room).emit('message', formatMessage(user.username, msg));
   });
 
   socket.on('disconnect', () => {
